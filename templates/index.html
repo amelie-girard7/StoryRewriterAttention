@@ -96,15 +96,6 @@
 </head>
 <body>
 
-    <div class="model-controls">
-        <label for="model-select">Select Model:</label>
-        <select id="model-select">
-            <!-- Model options will be populated by JavaScript -->
-        </select>
-        <button id="heatmap-button">View Heatmap</button>
-        <button id="model-view-button">Visualize Model View</button>
-    </div>
-    
     <div class="controls">
         <label for="story-select">Select Premise:</label>
         <select id="story-select">
@@ -129,6 +120,15 @@
             <label for="generated-text">Generated Text:</label>
             <div id="generated-text" readonly></div>
         </div>
+    </div>
+
+    <div class="model-controls">
+        <label for="model-select">Select Model:</label>
+        <select id="model-select">
+            <!-- Model options will be populated by JavaScript -->
+        </select>
+        <button id="heatmap-button">View Heatmap</button>
+        <button id="model-view-button">Visualize Model View</button>
     </div>
 
     <div id="attention-map">
