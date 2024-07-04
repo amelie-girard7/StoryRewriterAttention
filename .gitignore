@@ -1,0 +1,41 @@
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
+# Python Bytecode Files
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+
+# Environment Variables
+.env
+
+# Virtual Environment
+.venv/
+env/
+venv/
+
+# IDE/Editor Files
+.idea/
+.vscode/
+
+# MacOS Files
+.DS_Store
+
+# Log Files
+*.log
+
+# Backup Files
+*.tmp
+*.bak
+
+# Notebooks
+notebooks/
+
+# Build Artifacts
+build/
+dist/
+*.egg-info/
+*.egg
