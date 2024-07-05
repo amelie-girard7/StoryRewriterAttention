@@ -219,7 +219,7 @@
             // Visualize model view on button click
             modelViewButton.addEventListener('click', () => {
                 const selectedStoryIndex = storySelect.value;
-                axios.post('/visualize_model_view', { story_index: selectedStoryIndex, attention_type: 'cross' })
+                axios.post('/visualize_model_view', { story_index: selectedStoryIndex })
                     .then(response => {
                         const newWindow = window.open();
                         newWindow.document.write(response.data);

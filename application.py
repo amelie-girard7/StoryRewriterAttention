@@ -210,7 +210,6 @@ def visualize_model_view():
     Generate and return the model view visualization for the attention mechanism.
     """
     story_index = request.json.get('story_index')
-    attention_type = request.json.get('attention_type')
     if story_index is None:
         return jsonify({"error": "Story index not provided"}), 400
 
@@ -241,9 +240,9 @@ def visualize_model_view():
 
     try:
         html_content = model_view(
-            encoder_attention=encoder_attentions if attention_type == 'encoder' else None,
-            decoder_attention=decoder_attentions if attention_type == 'decoder' else None,
-            cross_attention=cross_attentions if attention_type == 'cross' else None,
+            encoder_attention=encoder_attentions,
+            decoder_attention=decoder_attentions,
+            cross_attention=cross_attentions,
             encoder_tokens=encoder_text,
             decoder_tokens=generated_text_tokens,
             html_action='return'
