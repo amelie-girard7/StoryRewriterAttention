@@ -12,7 +12,7 @@
             margin: 0;
             padding: 20px;
         }
-        .controls, .model-controls {
+        .controls {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
@@ -22,7 +22,7 @@
             border: 1px solid #ddd;
             border-radius: 8px;
         }
-        .controls label, .model-controls label {
+        .controls label {
             margin-right: 13px;
         }
         select, button, textarea {
@@ -54,25 +54,30 @@
         }
         .story-details .row {
             display: flex;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             margin-bottom: 20px;
             align-items: center;
         }
         .story-details label {
-            flex: 1;
+            flex: 0 0 120px; /* Fixed width for labels */
             margin-right: 10px;
             font-weight: bold;
             color: #555;
         }
         .story-details textarea {
-            flex: 5;
+            flex: 1;
             margin-right: 10px;
             resize: vertical;
-            height: 50px;
+            height: 70px; /* Increased height */
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
             background-color: #f7f7f7;
+        }
+        .story-details .right-textarea {
+            flex: 2;
+            margin-right: 0;
+            height: 70px; /* Increased height */
         }
         #attention-map {
             width: 100%;
@@ -85,7 +90,7 @@
             margin: auto;
         }
         #generated-text {
-            flex: 5;
+            flex: 1;
             margin-right: 10px;
             padding: 10px;
             border: 1px solid #ddd;
@@ -101,6 +106,12 @@
         <select id="story-select">
             <!-- Options will be populated by JavaScript -->
         </select>
+        <label for="model-select">Select Model:</label>
+        <select id="model-select">
+            <!-- Model options will be populated by JavaScript -->
+        </select>
+        <button id="heatmap-button">View Heatmap</button>
+        <button id="model-view-button">Visualize Model View</button>
     </div>
 
     <div class="story-details" id="story-details">
@@ -108,27 +119,18 @@
             <label for="initial-text">Initial:</label>
             <textarea id="initial-text" readonly></textarea>
             <label for="original-ending-text">Original Ending:</label>
-            <textarea id="original-ending-text" readonly></textarea>
+            <textarea id="original-ending-text" class="right-textarea" readonly></textarea>
         </div>
         <div class="row">
             <label for="counterfactual-text">Counterfactual:</label>
             <textarea id="counterfactual-text" readonly></textarea>
             <label for="edited-ending-text">Edited Ending:</label>
-            <textarea id="edited-ending-text" readonly></textarea>
+            <textarea id="edited-ending-text" class="right-textarea" readonly></textarea>
         </div>
         <div class="row">
             <label for="generated-text">Generated Text:</label>
-            <div id="generated-text" readonly></div>
+            <div id="generated-text" class="right-textarea" readonly></div>
         </div>
-    </div>
-
-    <div class="model-controls">
-        <label for="model-select">Select Model:</label>
-        <select id="model-select">
-            <!-- Model options will be populated by JavaScript -->
-        </select>
-        <button id="heatmap-button">View Heatmap</button>
-        <button id="model-view-button">Visualize Model View</button>
     </div>
 
     <div id="attention-map">
@@ -171,7 +173,8 @@
 
             // Fetch and populate stories
             modelSelect.addEventListener('change', () => {
-                axios.post('/get_stories').then(response => {
+                const selectedModel = modelSelect.value;
+                axios.post('/get_stories', { model_key: selectedModel }).then(response => {
                     stories = response.data;
                     storySelect.innerHTML = ''; // Clear previous options
                     stories.forEach((story, index) => {
@@ -208,7 +211,8 @@
             // Visualize heatmap on button click
             heatmapButton.addEventListener('click', () => {
                 const selectedStoryIndex = storySelect.value;
-                axios.post('/visualize_attention', { story_index: selectedStoryIndex })
+                const selectedModel = modelSelect.value;
+                axios.post('/visualize_attention', { story_index: selectedStoryIndex, model_key: selectedModel })
                     .then(response => {
                         const imagePath = response.data.image_path;
                         heatmapImage.src = `/images/${imagePath.split('/').pop()}`;
@@ -219,7 +223,8 @@
             // Visualize model view on button click
             modelViewButton.addEventListener('click', () => {
                 const selectedStoryIndex = storySelect.value;
-                axios.post('/visualize_model_view', { story_index: selectedStoryIndex })
+                const selectedModel = modelSelect.value;
+                axios.post('/visualize_model_view', { story_index: selectedStoryIndex, model_key: selectedModel })
                     .then(response => {
                         const newWindow = window.open();
                         newWindow.document.write(response.data);

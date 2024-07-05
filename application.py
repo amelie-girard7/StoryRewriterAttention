@@ -18,8 +18,7 @@ class Config:
     DEBUG = False
     TESTING = False
     DATABASE_URI = os.getenv('DATABASE_URI', 'sqlite:///:memory:')
-    DATA_PATH = os.getenv('DATA_PATH', 'data/model_2024-03-22-10/test_data_sample-attention.csv')
-    ATTENTION_PATH = os.getenv('ATTENTION_PATH', 'data/model_2024-03-22-10/attentions')
+    DATA_DIR = 'data'  # Base directory for models
 
 class ProductionConfig(Config):
     pass
@@ -39,8 +38,7 @@ else:
     app.config.from_object(DevelopmentConfig)
 
 # Use configuration values
-DATA_PATH = Path(app.config['DATA_PATH'])
-ATTENTION_PATH = Path(app.config['ATTENTION_PATH'])
+DATA_DIR = Path(app.config['DATA_DIR'])
 
 def load_data(file_path):
     """
@@ -104,7 +102,13 @@ def get_models():
     Return a list of models available for selection.
     """
     logger.info("get_models endpoint called")
-    models = [{"key": "T5-base weight 1-1", "comment": "T5-base weight 1-1"}]
+    model_mappings = {
+        "model_2024-03-22-10": "T5-base weight 1-1",
+        "model_2024-04-09-22": "T5-base weight 13-1",
+        "model_2024-04-08-13": "T5-base weight 20-1",
+        "model_2024-05-13-17": "T5-base weight 13-1 (Gold data)"
+    }
+    models = [{"key": key, "comment": comment} for key, comment in model_mappings.items()]
     return jsonify(models)
 
 @app.route('/get_stories', methods=['POST'])
@@ -113,7 +117,12 @@ def get_stories():
     Return a list of stories from the loaded data.
     """
     logger.info("get_stories endpoint called")
-    data = load_data(DATA_PATH)
+    model_key = request.json.get('model_key')
+    if model_key is None:
+        return jsonify({"error": "Model key not provided"}), 400
+
+    data_path = DATA_DIR / model_key / 'test_data_sample-attention.csv'
+    data = load_data(data_path)
     if data is None:
         logger.error("Data not found")
         return jsonify({"error": "Data not found"}), 404
@@ -126,16 +135,18 @@ def fetch_story_data():
     """
     Return detailed information about a specific story given its index.
     """
+    model_key = request.json.get('model_key')
     story_index = request.json.get('story_index')
-    if story_index is None:
-        return jsonify({"error": "Story index not provided"}), 400
+    if model_key is None or story_index is None:
+        return jsonify({"error": "Model key or Story index not provided"}), 400
 
     try:
         story_index = int(story_index)
     except ValueError:
         return jsonify({"error": "Invalid story index"}), 400
 
-    data = load_data(DATA_PATH)
+    data_path = DATA_DIR / model_key / 'test_data_sample-attention.csv'
+    data = load_data(data_path)
     if data is None:
         return jsonify({"error": "Data not found"}), 404
 
@@ -147,23 +158,27 @@ def visualize_attention():
     """
     Generate and return the attention heatmap for a specific story.
     """
+    model_key = request.json.get('model_key')
     story_index = request.json.get('story_index')
-    if story_index is None:
-        return jsonify({"error": "Story index not provided"}), 400
+    if model_key is None or story_index is None:
+        return jsonify({"error": "Model key or Story index not provided"}), 400
 
     try:
         story_index = int(story_index)
     except ValueError:
         return jsonify({"error": "Invalid story index"}), 400
 
-    data = load_data(DATA_PATH)
+    data_path = DATA_DIR / model_key / 'test_data_sample-attention.csv'
+    data = load_data(data_path)
     if data is None:
         return jsonify({"error": "Data not found"}), 404
 
     story_id = data.iloc[story_index]["StoryID"]
 
+    attention_path = DATA_DIR / model_key / 'attentions'
+
     try:
-        result = get_attention_data(ATTENTION_PATH, story_id)
+        result = get_attention_data(attention_path, story_id)
         if result is None:
             return jsonify({"error": "Error loading attention data"}), 500
         encoder_attentions, decoder_attentions, cross_attentions, encoder_text, generated_text, generated_text_tokens = result
@@ -209,23 +224,27 @@ def visualize_model_view():
     """
     Generate and return the model view visualization for the attention mechanism.
     """
+    model_key = request.json.get('model_key')
     story_index = request.json.get('story_index')
-    if story_index is None:
-        return jsonify({"error": "Story index not provided"}), 400
+    if model_key is None or story_index is None:
+        return jsonify({"error": "Model key or Story index not provided"}), 400
 
     try:
         story_index = int(story_index)
     except ValueError:
         return jsonify({"error": "Invalid story index"}), 400
 
-    data = load_data(DATA_PATH)
+    data_path = DATA_DIR / model_key / 'test_data_sample-attention.csv'
+    data = load_data(data_path)
     if data is None:
         return jsonify({"error": "Data not found"}), 404
 
     story_id = data.iloc[story_index]["StoryID"]
 
+    attention_path = DATA_DIR / model_key / 'attentions'
+
     try:
-        result = get_attention_data(ATTENTION_PATH, story_id)
+        result = get_attention_data(attention_path, story_id)
         if result is None:
             return jsonify({"error": "Error loading attention data"}), 500
         encoder_attentions, decoder_attentions, cross_attentions, encoder_text, generated_text, generated_text_tokens = result
