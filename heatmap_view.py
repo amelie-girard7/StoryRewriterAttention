@@ -5,7 +5,6 @@ import seaborn as sns
 import os
 from flask import jsonify
 import logging
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -34,10 +33,9 @@ def get_attention_data(attention_path, story_id):
         return None
 
     try:
-        tokens_path = attention_dir / "tokens.json"
-        with open(tokens_path) as f:
+        with open(attention_dir / "tokens.json") as f:
             tokens = json.load(f)
-            logger.info(f"Loaded tokens.json from {tokens_path}")
+            logger.info("Loaded tokens.json")
     except Exception as e:
         logger.error(f"Error loading tokens.json: {e}")
         return None
@@ -61,7 +59,7 @@ def plot_attention_heatmap(attention, x_tokens, y_tokens, title, image_path):
     x_tokens (list of str): The input tokens.
     y_tokens (list of str): The generated text tokens.
     title (str): The title for the heatmap.
-    image_path (Path): The path to save the generated heatmap image.
+    image_path (str): The path to save the generated heatmap image.
     """
     logger.info("Number of x_tokens (input): %d", len(x_tokens))
     logger.info("Number of y_tokens (generated text): %d", len(y_tokens))
@@ -161,6 +159,6 @@ def generate_attention_image_path(model_key, story_id, base_dir):
     base_dir (Path): The base directory where the data is stored.
 
     Returns:
-    Path: The path to the attention heatmap image.
+    str: The path to the attention heatmap image.
     """
     return base_dir / model_key / 'attentions' / story_id / f'attention_heatmap_{story_id}.png'
