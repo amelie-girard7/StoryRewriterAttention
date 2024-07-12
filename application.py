@@ -66,11 +66,17 @@ def get_models():
     Return a list of models available for selection.
     """
     logger.info("get_models endpoint called")
+    # Updated model mappings
     model_mappings = {
         "model_2024-03-22-10": "T5-base weight 1-1",
         "model_2024-04-09-22": "T5-base weight 13-1",
         "model_2024-04-08-13": "T5-base weight 20-1",
-        "model_2024-05-13-17": "T5-base weight 13-1 (Gold data)"
+        "model_2024-03-22-15": "T5-large weight 1-1",
+        "model_2024-04-10-10": "T5-large weight 15-1",
+        "model_2024-04-08-09": "T5-large weight 20-1",
+        "model_2024-04-10-14": "T5-large weight 30-1",
+        "model_2024-05-13-17": "T5-base weight 13-1 (Gold data)",
+        "model_2024-05-14-20": "T5-large weight 20-1 (Gold data)"
     }
     models = [{"key": key, "comment": comment} for key, comment in model_mappings.items()]
     return jsonify(models)
