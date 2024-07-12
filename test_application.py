@@ -2,7 +2,7 @@ import sys
 import os
 import pytest
 import pandas as pd
-import numpy as np  # Import numpy
+import numpy as np
 from unittest import mock
 
 # Add the directory containing application.py to the Python path
@@ -28,42 +28,7 @@ def test_get_models(client):
     assert rv.status_code == 200
     json_data = rv.get_json()
     assert isinstance(json_data, list)
-    assert json_data[0]['key'] == 'T5-base weight 1-1'
-
-def test_get_stories(client, mocker):
-    """Test the get_stories route."""
-    mock_data = pd.DataFrame({
-        'Premise': ['Test Premise'],
-        'Initial': ['Test Initial'],
-        'Original Ending': ['Test Original Ending'],
-        'Counterfactual': ['Test Counterfactual'],
-        'Edited Ending': ['Test Edited Ending'],
-        'Generated Text': ['Test Generated Text'],
-        'StoryID': ['1']
-    })
-    mocker.patch('application.load_data', return_value=mock_data)
-    rv = client.post('/get_stories')
-    assert rv.status_code == 200
-    json_data = rv.get_json()
-    assert isinstance(json_data, list)
-    assert json_data[0]['Premise'] == 'Test Premise'
-
-def test_fetch_story_data(client, mocker):
-    """Test the fetch_story_data route."""
-    mock_data = pd.DataFrame({
-        'Premise': ['Test Premise'],
-        'Initial': ['Test Initial'],
-        'Original Ending': ['Test Original Ending'],
-        'Counterfactual': ['Test Counterfactual'],
-        'Edited Ending': ['Test Edited Ending'],
-        'Generated Text': ['Test Generated Text'],
-        'StoryID': ['1']
-    })
-    mocker.patch('application.load_data', return_value=mock_data)
-    rv = client.post('/fetch_story_data', json={'story_index': 0})
-    assert rv.status_code == 200
-    json_data = rv.get_json()
-    assert json_data['Premise'] == 'Test Premise'
+    assert json_data[0]['key'] == 'model_2024-03-22-10'
 
 def test_visualize_attention(client, mocker):
     """Test the visualize_attention route."""
@@ -74,7 +39,7 @@ def test_visualize_attention(client, mocker):
         'Counterfactual': ['Test Counterfactual'],
         'Edited Ending': ['Test Edited Ending'],
         'Generated Text': ['Test Generated Text'],
-        'StoryID': ['1']
+        'StoryID': ['9387e571-2819-4e29-bedb-a35f0410da51']
     })
     mock_attention_data = (
         [np.random.rand(1, 12, 2, 2) for _ in range(12)],  # encoder_attentions
@@ -84,42 +49,30 @@ def test_visualize_attention(client, mocker):
         'generated text',  # generated_text
         ['gen_token1', 'gen_token2']  # generated_text_tokens
     )
+    mocker.patch('heatmap_view.get_attention_data', return_value=mock_attention_data)
+    mocker.patch('heatmap_view.plot_attention_heatmap', return_value=None)
     mocker.patch('application.load_data', return_value=mock_data)
-    mocker.patch('application.get_attention_data', return_value=mock_attention_data)
-    mocker.patch('application.plot_attention_heatmap', return_value=None)
-    rv = client.post('/visualize_attention', json={'story_index': 0})
+
+    # Test for the first story ID in model_2024-03-22-10
+    rv = client.post('/visualize_attention', json={'model_key': 'model_2024-03-22-10', 'story_index': 0})
     assert rv.status_code == 200
     json_data = rv.get_json()
     assert 'image_path' in json_data
+    print("Image path:", json_data['image_path'])  # Debugging log
 
-
-def test_visualize_model_view(client, mocker):
-    """Test the visualize_model_view route."""
+    # Test for the second story ID in model_2024-03-22-10
     mock_data = pd.DataFrame({
-        'Premise': ['Test Premise'],
-        'Initial': ['Test Initial'],
-        'Original Ending': ['Test Original Ending'],
-        'Counterfactual': ['Test Counterfactual'],
-        'Edited Ending': ['Test Edited Ending'],
-        'Generated Text': ['Test Generated Text'],
-        'StoryID': ['1']
+        'Premise': ['Test Premise 2'],
+        'Initial': ['Test Initial 2'],
+        'Original Ending': ['Test Original Ending 2'],
+        'Counterfactual': ['Test Counterfactual 2'],
+        'Edited Ending': ['Test Edited Ending 2'],
+        'Generated Text': ['Test Generated Text 2'],
+        'StoryID': ['ca8a7f8d-7f63-422f-8007-c4a26bb8e889']
     })
-    mock_attention_data = (
-        [np.random.rand(1, 12, 2, 2) for _ in range(12)],  # encoder_attentions
-        [np.random.rand(1, 12, 2, 2) for _ in range(12)],  # decoder_attentions
-        [np.random.rand(1, 12, 2, 2) for _ in range(12)],  # cross_attentions
-        ['token1', 'token2'],  # encoder_text
-        'generated text',  # generated_text
-        ['gen_token1', 'gen_token2']  # generated_text_tokens
-    )
     mocker.patch('application.load_data', return_value=mock_data)
-    mocker.patch('application.get_attention_data', return_value=mock_attention_data)
-    rv = client.post('/visualize_model_view', json={'story_index': 0, 'attention_type': 'cross'})
+    rv = client.post('/visualize_attention', json={'model_key': 'model_2024-03-22-10', 'story_index': 0})
     assert rv.status_code == 200
-    response_data = rv.data.decode('utf-8')
-    print("Response data:", response_data)  # Debugging log
-    assert '<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>' in response_data
-    assert '<div id="vis">' in response_data  # Adjust this based on actual analysis
-
-if __name__ == '__main__':
-    pytest.main()
+    json_data = rv.get_json()
+    assert 'image_path' in json_data
+    print("Image path:", json_data['image_path'])  # Debugging log

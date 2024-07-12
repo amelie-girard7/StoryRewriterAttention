@@ -97,15 +97,6 @@
             border-radius: 4px;
             background-color: #f7f7f7;
         }
-        .footer {
-            text-align: center;
-            margin-top: 50px;
-            padding: 10px;
-            border-top: 1px solid #ddd;
-            background-color: white;
-            color: #777;
-            font-size: 14px;
-        }
     </style>
 </head>
 <body>
@@ -145,11 +136,6 @@
         <img id="heatmap-image" src="">
     </div>
     
-    <div class="footer">
-        © 2024 Amelie Girard. All Rights Reserved. <br>
-        Affiliation: Natural Language Processing, Understanding and Generation Lab (nlPUG), University of Technology Sydney.
-    </div>
-    
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -186,7 +172,6 @@
             // Fetch and populate stories
             modelSelect.addEventListener('change', () => {
                 const selectedModel = modelSelect.value;
-                console.log('Selected model:', selectedModel); // Print selected model
                 axios.post('/get_stories', { model_key: selectedModel }).then(response => {
                     stories = response.data;
                     storySelect.innerHTML = ''; // Clear previous options
@@ -209,8 +194,6 @@
             storySelect.addEventListener('change', () => {
                 const selectedStoryIndex = storySelect.value;
                 const story = stories[selectedStoryIndex];
-                console.log('Selected story index:', selectedStoryIndex); // Print selected story index
-                console.log('Selected story:', story); // Print selected story details
                 if (story) {
                     initialText.value = story.Initial;
                     originalEndingText.value = story['Original Ending'];
@@ -227,16 +210,12 @@
             heatmapButton.addEventListener('click', () => {
                 const selectedStoryIndex = storySelect.value;
                 const selectedModel = modelSelect.value;
-                console.log('Visualizing heatmap for model:', selectedModel, 'and story index:', selectedStoryIndex); // Print model and story index for heatmap
                 axios.post('/visualize_attention', { story_index: selectedStoryIndex, model_key: selectedModel })
                     .then(response => {
                         const imagePath = response.data.image_path;
-                        heatmapImage.src = `/images/${imagePath.split('/').pop()}`;
+                        const imageSrc = `/images/${selectedModel}/${imagePath.split('/').pop()}`;
+                        heatmapImage.src = imageSrc;
                         heatmapImage.style.display = 'block';
-                    })
-                    .catch(error => {
-                        console.error('Error fetching heatmap:', error);
-                        heatmapImage.style.display = 'none';
                     });
             });
         });

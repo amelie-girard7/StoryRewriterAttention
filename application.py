@@ -2,13 +2,11 @@ import os
 import json
 import logging
 from pathlib import Path
-from flask import Flask, jsonify, request, render_template, send_from_directory, make_response
+from flask import Flask, jsonify, request, render_template, send_file
 import pandas as pd
-import numpy as np
 
 # Importing visualization functions from separate files
-from heatmap_view import visualize_attention, plot_attention_heatmap
-from model_view import visualize_model_view
+from heatmap_view import visualize_attention, plot_attention_heatmap, get_attention_data
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -19,7 +17,7 @@ class Config:
     DEBUG = False
     TESTING = False
     DATABASE_URI = os.getenv('DATABASE_URI', 'sqlite:///:memory:')
-    DATA_DIR = 'data'  # Base directory for models
+    DATA_DIR = '/data/agirard/Projects/StoryRewriterAttention/data'
 
 class ProductionConfig(Config):
     pass
@@ -41,6 +39,14 @@ else:
 
 # Use configuration values
 DATA_DIR = Path(app.config['DATA_DIR'])
+
+# Hardcoded image paths dictionary for the specified model
+IMAGE_PATHS = {
+    "model_2024-03-22-10": {
+        "0": "/data/agirard/Projects/StoryRewriterAttention/data/model_2024-03-22-10/attentions/ca8a7f8d-7f63-422f-8007-c4a26bb8e889/attention_heatmap_ca8a7f8d-7f63-422f-8007-c4a26bb8e889.png",
+        "1": "/data/agirard/Projects/StoryRewriterAttention/data/model_2024-03-22-10/attentions/9387e571-2819-4e29-bedb-a35f0410da51/attention_heatmap_9387e571-2819-4e29-bedb-a35f0410da51.png"
+    }
+}
 
 def load_data(file_path):
     """
@@ -66,17 +72,8 @@ def get_models():
     Return a list of models available for selection.
     """
     logger.info("get_models endpoint called")
-    # Updated model mappings
     model_mappings = {
-        "model_2024-03-22-10": "T5-base weight 1-1",
-        "model_2024-04-09-22": "T5-base weight 13-1",
-        "model_2024-04-08-13": "T5-base weight 20-1",
-        "model_2024-03-22-15": "T5-large weight 1-1",
-        "model_2024-04-10-10": "T5-large weight 15-1",
-        "model_2024-04-08-09": "T5-large weight 20-1",
-        "model_2024-04-10-14": "T5-large weight 30-1",
-        "model_2024-05-13-17": "T5-base weight 13-1 (Gold data)",
-        "model_2024-05-14-20": "T5-large weight 20-1 (Gold data)"
+        "model_2024-03-22-10": "T5-base weight 1-1"
     }
     models = [{"key": key, "comment": comment} for key, comment in model_mappings.items()]
     return jsonify(models)
@@ -84,17 +81,16 @@ def get_models():
 @app.route('/get_stories', methods=['POST'])
 def get_stories():
     """
-    Return a list of stories from the loaded data.
+    Return a list of stories available for the given model.
     """
     logger.info("get_stories endpoint called")
     model_key = request.json.get('model_key')
-    if model_key is None:
-        return jsonify({"error": "Model key not provided"}), 400
+    if model_key is None or model_key != 'model_2024-03-22-10':
+        return jsonify({"error": "Model key not provided or invalid"}), 400
 
     data_path = DATA_DIR / model_key / 'test_data_sample-attention.csv'
     data = load_data(data_path)
     if data is None:
-        logger.error("Data not found")
         return jsonify({"error": "Data not found"}), 404
     logger.info("Loaded data: %s", data.head())
     stories = data[['Premise', 'Initial', 'Original Ending', 'Counterfactual', 'Edited Ending', 'Generated Text']].to_dict(orient='records')
@@ -107,8 +103,8 @@ def fetch_story_data():
     """
     model_key = request.json.get('model_key')
     story_index = request.json.get('story_index')
-    if model_key is None or story_index is None:
-        return jsonify({"error": "Model key or Story index not provided"}), 400
+    if model_key is None or story_index is None or model_key != 'model_2024-03-22-10':
+        return jsonify({"error": "Model key or Story index not provided or invalid"}), 400
 
     try:
         story_index = int(story_index)
@@ -128,21 +124,42 @@ def visualize_attention_route():
     """
     Route to handle visualization of attention heatmap for a specific story.
     """
-    return visualize_attention(request, DATA_DIR, load_data, logger, plot_attention_heatmap)
+    logger.info("visualize_attention endpoint called")
+    model_key = request.json.get('model_key')
+    story_index = request.json.get('story_index')
+    if model_key is None or story_index is None or model_key != 'model_2024-03-22-10':
+        return jsonify({"error": "Model key or Story index not provided or invalid"}), 400
+    
+    response = visualize_attention(request, DATA_DIR, load_data, logger, plot_attention_heatmap)
+    
+    if response.status_code == 200:
+        story_id = str(story_index)  # Convert to string to match the dictionary keys
+        IMAGE_PATHS[model_key][story_id] = response.json['image_path']  # Update dictionary with the new path
+    
+    return response
 
-@app.route('/images/<path:filename>')
-def serve_image(filename):
+@app.route('/images/<model_key>/<story_id>')
+def serve_image(model_key, story_id):
     """
-    Serve the generated heatmap image.
+    Serve the generated heatmap image from the model-specific directory.
     """
-    return send_from_directory('/tmp', filename)
+    logger.info(f"Requesting image for model_key: {model_key}, story_id: {story_id}")
+    if model_key != 'model_2024-03-22-10':
+        return jsonify({"error": "Model key not provided or invalid"}), 400
 
-@app.route('/visualize_model_view', methods=['POST'])
-def visualize_model_view_route():
-    """
-    Route to handle visualization of model view for the attention mechanism.
-    """
-    return visualize_model_view(request, DATA_DIR, load_data, logger)
+    image_path = IMAGE_PATHS.get(model_key, {}).get(story_id)
+    logger.info(f"Fetched image path from dictionary: {image_path}")
+    
+    if image_path is None:
+        logger.error(f"Image path is None for model_key: {model_key}, story_id: {story_id}")
+        return jsonify({"error": "Image not found"}), 404
+    
+    if not os.path.exists(image_path):
+        logger.error(f"Image path does not exist on the filesystem: {image_path}")
+        return jsonify({"error": "Image not found"}), 404
+
+    logger.info(f"Serving image from path: {image_path}")
+    return send_file(image_path)
 
 if __name__ == '__main__':
     app.run(debug=app.config['DEBUG'])

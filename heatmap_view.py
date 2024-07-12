@@ -2,8 +2,10 @@ import numpy as np
 import json
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
 from flask import jsonify
 import logging
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -22,15 +24,20 @@ def get_attention_data(attention_path, story_id):
 
     try:
         encoder_attentions = [np.load(attention_dir / f'encoder_attentions_layer_{i}.npy') for i in range(12)]
+        logger.info(f"Loaded encoder attentions for layers 0-11")
         decoder_attentions = [np.load(attention_dir / f'decoder_attentions_layer_{i}.npy') for i in range(12)]
+        logger.info(f"Loaded decoder attentions for layers 0-11")
         cross_attentions = [np.load(attention_dir / f'cross_attentions_layer_{i}.npy') for i in range(12)]
+        logger.info(f"Loaded cross attentions for layers 0-11")
     except Exception as e:
         logger.error(f"Error loading attention arrays: {e}")
         return None
 
     try:
-        with open(attention_dir / "tokens.json") as f:
+        tokens_path = attention_dir / "tokens.json"
+        with open(tokens_path) as f:
             tokens = json.load(f)
+            logger.info(f"Loaded tokens.json from {tokens_path}")
     except Exception as e:
         logger.error(f"Error loading tokens.json: {e}")
         return None
@@ -54,7 +61,7 @@ def plot_attention_heatmap(attention, x_tokens, y_tokens, title, image_path):
     x_tokens (list of str): The input tokens.
     y_tokens (list of str): The generated text tokens.
     title (str): The title for the heatmap.
-    image_path (str): The path to save the generated heatmap image.
+    image_path (Path): The path to save the generated heatmap image.
     """
     logger.info("Number of x_tokens (input): %d", len(x_tokens))
     logger.info("Number of y_tokens (generated text): %d", len(y_tokens))
@@ -80,6 +87,8 @@ def plot_attention_heatmap(attention, x_tokens, y_tokens, title, image_path):
     plt.title(title, fontsize=14)
     plt.tight_layout()
 
+    os.makedirs(os.path.dirname(image_path), exist_ok=True)  # Ensure the directory exists
+    logger.info(f"Saving heatmap to {image_path}")
     plt.savefig(image_path)
     plt.close()
 
@@ -105,6 +114,7 @@ def visualize_attention(request, data_dir, load_data_func, logger, plot_heatmap_
     story_id = data.iloc[story_index]["StoryID"]
 
     attention_path = data_dir / model_key / 'attentions'
+    image_path = generate_attention_image_path(model_key, story_id, data_dir)
 
     try:
         result = get_attention_data(attention_path, story_id)
@@ -133,10 +143,24 @@ def visualize_attention(request, data_dir, load_data_func, logger, plot_heatmap_
             logger.error("Unexpected attention matrix dimension: %dD", first_batch_attention.ndim)
             raise ValueError(f"Unexpected attention matrix dimension: {first_batch_attention.ndim}D")
 
-        image_path = f'/tmp/attention_heatmap_{story_id}.png'
         plot_heatmap_func(attention_to_plot, encoder_text, generated_text_tokens, "Cross-Attention Weights (First Layer)", image_path)
+        logger.info(f"Generated heatmap image path: {image_path}")  # Debug: Print generated image path
     except Exception as e:
         logger.error("Error generating heatmap: %s", str(e))
         return jsonify({"error": str(e)}), 500
 
-    return jsonify({"image_path": image_path})
+    return jsonify({"image_path": str(image_path)})
+
+def generate_attention_image_path(model_key, story_id, base_dir):
+    """
+    Generate the path for the attention heatmap image based on model key and story ID.
+
+    Parameters:
+    model_key (str): The model identifier.
+    story_id (str): The story identifier.
+    base_dir (Path): The base directory where the data is stored.
+
+    Returns:
+    Path: The path to the attention heatmap image.
+    """
+    return base_dir / model_key / 'attentions' / story_id / f'attention_heatmap_{story_id}.png'
