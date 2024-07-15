@@ -208,15 +208,10 @@
 
             // Visualize heatmap on button click
             heatmapButton.addEventListener('click', () => {
-                const selectedStoryIndex = storySelect.value;
-                const selectedModel = modelSelect.value;
-                axios.post('/visualize_attention', { story_index: selectedStoryIndex, model_key: selectedModel })
-                    .then(response => {
-                        const imagePath = response.data.image_path;
-                        const imageSrc = `/images/${selectedModel}/${imagePath.split('/').pop()}`;
-                        heatmapImage.src = imageSrc;
-                        heatmapImage.style.display = 'block';
-                    });
+                const modelKey = modelSelect.value;
+                const imagePath = `/images/${modelKey}/9387e571-2819-4e29-bedb-a35f0410da51/attention_heatmap_9387e571-2819-4e29-bedb-a35f0410da51.png`;
+                heatmapImage.src = imagePath;
+                heatmapImage.style.display = 'block';
             });
         });
     </script>

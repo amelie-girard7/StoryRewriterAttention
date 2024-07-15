@@ -74,10 +74,12 @@ def get_models():
         "model_2024-04-08-09": "T5-large weight 20-1",
         "model_2024-04-10-14": "T5-large weight 30-1",
         "model_2024-05-13-17": "T5-base weight 13-1 (Gold data)",
-        "model_2024-05-14-20": "T5-large weight 20-1 (Gold data)"
+        #"model_2024-05-14-20": "T5-large weight 20-1 (Gold data)"
     }
-    models = [{"key": key, "comment": comment} for key, comment in model_mappings.items()]
-    return jsonify(models)
+    #models = [{"key": key, "comment": comment} for key, comment in model_mappings.items()]
+    #return jsonify(models)
+    return jsonify([{"key": key, "comment": comment} for key, comment in model_mappings.items()])
+
 
 @app.route('/get_stories', methods=['POST'])
 def get_stories():
@@ -129,7 +131,9 @@ def visualize_attention_route():
     logger.info("visualize_attention endpoint called")
     model_key = request.json.get('model_key')
     story_index = request.json.get('story_index')
-    logger.info(f"Received model_key: {model_key}, story_index: {story_index}")  # Debug: Print received parameters
+    model_name = request.json.get('model_name')  # Get the model name from the request
+
+    logger.info(f"Received model_key: {model_key}, story_index: {story_index}, model_name: {model_name}")  # Debug: Print received parameters
     
     if model_key is None or story_index is None:
         return jsonify({"error": "Model key or Story index not provided"}), 400
@@ -184,13 +188,14 @@ def visualize_attention_route():
 
     return jsonify({"image_path": str(image_path)})
 
-@app.route('/images/<model_key>/<path:filename>')
-def serve_image(model_key, filename):
+@app.route('/images/<model_key>/<story_id>/<filename>')
+def serve_image(model_key, story_id, filename):
     """
     Serve the generated heatmap image from the model-specific directory.
     """
-    model_dir = DATA_DIR / model_key / 'attentions'
-    return send_from_directory(model_dir, filename)
+    image_path = app.config['DATA_DIR'] / model_key / 'attentions' / story_id / filename
+    return send_from_directory(image_path.parent, image_path.name)
+
 
 def generate_attention_image_path(model_key, story_id, base_dir):
     """
@@ -204,7 +209,8 @@ def generate_attention_image_path(model_key, story_id, base_dir):
     Returns:
     str: The path to the attention heatmap image.
     """
-    return base_dir / model_key / 'attentions' / story_id / f'attention_heatmap_{story_id}.png'
+    return app.config['DATA_DIR'] / model_key / 'attentions' / f'{story_id}' / f'attention_heatmap_{story_id}.png'
+
 
 if __name__ == '__main__':
     app.run(debug=app.config['DEBUG'])
