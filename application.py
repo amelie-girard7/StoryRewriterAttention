@@ -8,8 +8,8 @@ class Config:
     DEBUG = False
     TESTING = False
     DATABASE_URI = os.getenv('DATABASE_URI', 'sqlite:///:memory:')
-    DATA_DIR = Path('/data/agirard/Projects/StoryRewriterAttention/data')
-    IMAGE_DIR = Path('/data/agirard/Projects/StoryRewriterAttention/images')
+    DATA_DIR = Path('data')
+    IMAGE_DIR = Path('images')
 
 # Initialize Flask app
 app = Flask(__name__, static_url_path='/static')
@@ -38,7 +38,6 @@ def get_models():
         "model_2024-04-10-10": "T5-large weight 15-1",
         "model_2024-04-08-09": "T5-large weight 20-1",
         "model_2024-04-10-14": "T5-large weight 30-1"
-        #"model_2024-05-13-17": "T5-base weight 13-1 (Gold data)"
     }
     models = [{"key": key, "comment": comment} for key, comment in model_mappings.items()]
     return jsonify(models)
@@ -49,7 +48,7 @@ def get_stories():
     if model_key is None:
         return jsonify({"error": "Model key not provided"}), 400
 
-    data_path = DATA_DIR / model_key / 'test_data_sample-attention.csv'
+    data_path = DATA_DIR / f'{model_key}/test_data_sample-attention.csv'
     data = load_data(data_path)
     if data is None:
         return jsonify({"error": "Data not found"}), 404
@@ -69,7 +68,7 @@ def fetch_story_data():
     except ValueError:
         return jsonify({"error": "Invalid story index"}), 400
 
-    data_path = DATA_DIR / model_key / 'test_data_sample-attention.csv'
+    data_path = DATA_DIR / f'{model_key}/test_data_sample-attention.csv'
     data = load_data(data_path)
     if data is None:
         return jsonify({"error": "Data not found"}), 404
@@ -90,7 +89,7 @@ def visualize_attention_route():
     except ValueError:
         return jsonify({"error": "Invalid story index"}), 400
 
-    data_path = DATA_DIR / model_key / 'test_data_sample-attention.csv'
+    data_path = DATA_DIR / f'{model_key}/test_data_sample-attention.csv'
     data = load_data(data_path)
     if data is None:
         return jsonify({"error": "Data not found"}), 404
