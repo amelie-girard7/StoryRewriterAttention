@@ -52,13 +52,13 @@ def test_visualize_attention(client, mocker):
     mocker.patch('heatmap_view.get_attention_data', return_value=mock_attention_data)
     mocker.patch('heatmap_view.plot_attention_heatmap', return_value=None)
     mocker.patch('application.load_data', return_value=mock_data)
+
     rv = client.post('/visualize_attention', json={'model_key': 'model_2024-03-22-10', 'story_index': 0})
     assert rv.status_code == 200
     json_data = rv.get_json()
     assert 'image_path' in json_data
-    print("Image path:", json_data['image_path'])  # Debugging log
+    print("Image path for model_2024-03-22-10, story 9387e571-2819-4e29-bedb-a35f0410da51:", json_data['image_path'])  # Debugging log
 
-    # Test for the second story ID in model_2024-03-22-10
     mock_data = pd.DataFrame({
         'Premise': ['Test Premise 2'],
         'Initial': ['Test Initial 2'],
@@ -69,13 +69,13 @@ def test_visualize_attention(client, mocker):
         'StoryID': ['ca8a7f8d-7f63-422f-8007-c4a26bb8e889']
     })
     mocker.patch('application.load_data', return_value=mock_data)
+
     rv = client.post('/visualize_attention', json={'model_key': 'model_2024-03-22-10', 'story_index': 0})
     assert rv.status_code == 200
     json_data = rv.get_json()
     assert 'image_path' in json_data
-    print("Image path:", json_data['image_path'])  # Debugging log
+    print("Image path for model_2024-03-22-10, story ca8a7f8d-7f63-422f-8007-c4a26bb8e889:", json_data['image_path'])  # Debugging log
 
-    # Test for the first story ID in model_2024-03-22-15
     mock_data = pd.DataFrame({
         'Premise': ['Test Premise'],
         'Initial': ['Test Initial'],
@@ -86,13 +86,13 @@ def test_visualize_attention(client, mocker):
         'StoryID': ['9387e571-2819-4e29-bedb-a35f0410da51']
     })
     mocker.patch('application.load_data', return_value=mock_data)
+
     rv = client.post('/visualize_attention', json={'model_key': 'model_2024-03-22-15', 'story_index': 0})
     assert rv.status_code == 200
     json_data = rv.get_json()
     assert 'image_path' in json_data
-    print("Image path:", json_data['image_path'])  # Debugging log
+    print("Image path for model_2024-03-22-15, story 9387e571-2819-4e29-bedb-a35f0410da51:", json_data['image_path'])  # Debugging log
 
-    # Test for the second story ID in model_2024-03-22-15
     mock_data = pd.DataFrame({
         'Premise': ['Test Premise 2'],
         'Initial': ['Test Initial 2'],
@@ -103,13 +103,13 @@ def test_visualize_attention(client, mocker):
         'StoryID': ['ca8a7f8d-7f63-422f-8007-c4a26bb8e889']
     })
     mocker.patch('application.load_data', return_value=mock_data)
+
     rv = client.post('/visualize_attention', json={'model_key': 'model_2024-03-22-15', 'story_index': 0})
     assert rv.status_code == 200
     json_data = rv.get_json()
     assert 'image_path' in json_data
-    print("Image path:", json_data['image_path'])  # Debugging log
+    print("Image path for model_2024-03-22-15, story ca8a7f8d-7f63-422f-8007-c4a26bb8e889:", json_data['image_path'])  # Debugging log
 
-    # Test for the first story ID in model_2024-04-08-09
     mock_data = pd.DataFrame({
         'Premise': ['Test Premise'],
         'Initial': ['Test Initial'],
@@ -120,13 +120,13 @@ def test_visualize_attention(client, mocker):
         'StoryID': ['9387e571-2819-4e29-bedb-a35f0410da51']
     })
     mocker.patch('application.load_data', return_value=mock_data)
+
     rv = client.post('/visualize_attention', json={'model_key': 'model_2024-04-08-09', 'story_index': 0})
     assert rv.status_code == 200
     json_data = rv.get_json()
     assert 'image_path' in json_data
-    print("Image path:", json_data['image_path'])  # Debugging log
+    print("Image path for model_2024-04-08-09, story 9387e571-2819-4e29-bedb-a35f0410da51:", json_data['image_path'])  # Debugging log
 
-    # Test for the second story ID in model_2024-04-08-09
     mock_data = pd.DataFrame({
         'Premise': ['Test Premise 2'],
         'Initial': ['Test Initial 2'],
@@ -137,13 +137,13 @@ def test_visualize_attention(client, mocker):
         'StoryID': ['ca8a7f8d-7f63-422f-8007-c4a26bb8e889']
     })
     mocker.patch('application.load_data', return_value=mock_data)
+
     rv = client.post('/visualize_attention', json={'model_key': 'model_2024-04-08-09', 'story_index': 0})
     assert rv.status_code == 200
     json_data = rv.get_json()
     assert 'image_path' in json_data
-    print("Image path:", json_data['image_path'])  # Debugging log
+    print("Image path for model_2024-04-08-09, story ca8a7f8d-7f63-422f-8007-c4a26bb8e889:", json_data['image_path'])  # Debugging log
 
-    # Test for the first story ID in model_2024-04-08-13
     mock_data = pd.DataFrame({
         'Premise': ['Test Premise'],
         'Initial': ['Test Initial'],
@@ -154,13 +154,13 @@ def test_visualize_attention(client, mocker):
         'StoryID': ['9387e571-2819-4e29-bedb-a35f0410da51']
     })
     mocker.patch('application.load_data', return_value=mock_data)
+
     rv = client.post('/visualize_attention', json={'model_key': 'model_2024-04-08-13', 'story_index': 0})
     assert rv.status_code == 200
     json_data = rv.get_json()
     assert 'image_path' in json_data
-    print("Image path:", json_data['image_path'])  # Debugging log
+    print("Image path for model_2024-04-08-13, story 9387e571-2819-4e29-bedb-a35f0410da51:", json_data['image_path'])  # Debugging log
 
-    # Test for the second story ID in model_2024-04-08-13
     mock_data = pd.DataFrame({
         'Premise': ['Test Premise 2'],
         'Initial': ['Test Initial 2'],
@@ -171,13 +171,13 @@ def test_visualize_attention(client, mocker):
         'StoryID': ['ca8a7f8d-7f63-422f-8007-c4a26bb8e889']
     })
     mocker.patch('application.load_data', return_value=mock_data)
+
     rv = client.post('/visualize_attention', json={'model_key': 'model_2024-04-08-13', 'story_index': 0})
     assert rv.status_code == 200
     json_data = rv.get_json()
     assert 'image_path' in json_data
-    print("Image path:", json_data['image_path'])  # Debugging log
+    print("Image path for model_2024-04-08-13, story ca8a7f8d-7f63-422f-8007-c4a26bb8e889:", json_data['image_path'])  # Debugging log
 
-    # Test for the first story ID in model_2024-04-09-11
     mock_data = pd.DataFrame({
         'Premise': ['Test Premise'],
         'Initial': ['Test Initial'],
@@ -188,13 +188,13 @@ def test_visualize_attention(client, mocker):
         'StoryID': ['9387e571-2819-4e29-bedb-a35f0410da51']
     })
     mocker.patch('application.load_data', return_value=mock_data)
+
     rv = client.post('/visualize_attention', json={'model_key': 'model_2024-04-09-11', 'story_index': 0})
     assert rv.status_code == 200
     json_data = rv.get_json()
     assert 'image_path' in json_data
-    print("Image path:", json_data['image_path'])  # Debugging log
+    print("Image path for model_2024-04-09-11, story 9387e571-2819-4e29-bedb-a35f0410da51:", json_data['image_path'])  # Debugging log
 
-    # Test for the second story ID in model_2024-04-09-11
     mock_data = pd.DataFrame({
         'Premise': ['Test Premise 2'],
         'Initial': ['Test Initial 2'],
@@ -205,13 +205,13 @@ def test_visualize_attention(client, mocker):
         'StoryID': ['ca8a7f8d-7f63-422f-8007-c4a26bb8e889']
     })
     mocker.patch('application.load_data', return_value=mock_data)
+
     rv = client.post('/visualize_attention', json={'model_key': 'model_2024-04-09-11', 'story_index': 0})
     assert rv.status_code == 200
     json_data = rv.get_json()
     assert 'image_path' in json_data
-    print("Image path:", json_data['image_path'])  # Debugging log
+    print("Image path for model_2024-04-09-11, story ca8a7f8d-7f63-422f-8007-c4a26bb8e889:", json_data['image_path'])  # Debugging log
 
-    # Test for the first story ID in model_2024-04-09-22
     mock_data = pd.DataFrame({
         'Premise': ['Test Premise'],
         'Initial': ['Test Initial'],
@@ -222,13 +222,13 @@ def test_visualize_attention(client, mocker):
         'StoryID': ['9387e571-2819-4e29-bedb-a35f0410da51']
     })
     mocker.patch('application.load_data', return_value=mock_data)
+
     rv = client.post('/visualize_attention', json={'model_key': 'model_2024-04-09-22', 'story_index': 0})
     assert rv.status_code == 200
     json_data = rv.get_json()
     assert 'image_path' in json_data
-    print("Image path:", json_data['image_path'])  # Debugging log
+    print("Image path for model_2024-04-09-22, story 9387e571-2819-4e29-bedb-a35f0410da51:", json_data['image_path'])  # Debugging log
 
-    # Test for the second story ID in model_2024-04-09-22
     mock_data = pd.DataFrame({
         'Premise': ['Test Premise 2'],
         'Initial': ['Test Initial 2'],
@@ -239,13 +239,13 @@ def test_visualize_attention(client, mocker):
         'StoryID': ['ca8a7f8d-7f63-422f-8007-c4a26bb8e889']
     })
     mocker.patch('application.load_data', return_value=mock_data)
+
     rv = client.post('/visualize_attention', json={'model_key': 'model_2024-04-09-22', 'story_index': 0})
     assert rv.status_code == 200
     json_data = rv.get_json()
     assert 'image_path' in json_data
-    print("Image path:", json_data['image_path'])  # Debugging log
+    print("Image path for model_2024-04-09-22, story ca8a7f8d-7f63-422f-8007-c4a26bb8e889:", json_data['image_path'])  # Debugging log
 
-    # Test for the first story ID in model_2024-04-10-10
     mock_data = pd.DataFrame({
         'Premise': ['Test Premise'],
         'Initial': ['Test Initial'],
@@ -256,13 +256,13 @@ def test_visualize_attention(client, mocker):
         'StoryID': ['9387e571-2819-4e29-bedb-a35f0410da51']
     })
     mocker.patch('application.load_data', return_value=mock_data)
+
     rv = client.post('/visualize_attention', json={'model_key': 'model_2024-04-10-10', 'story_index': 0})
     assert rv.status_code == 200
     json_data = rv.get_json()
     assert 'image_path' in json_data
-    print("Image path:", json_data['image_path'])  # Debugging log
+    print("Image path for model_2024-04-10-10, story 9387e571-2819-4e29-bedb-a35f0410da51:", json_data['image_path'])  # Debugging log
 
-    # Test for the second story ID in model_2024-04-10-10
     mock_data = pd.DataFrame({
         'Premise': ['Test Premise 2'],
         'Initial': ['Test Initial 2'],
@@ -273,13 +273,13 @@ def test_visualize_attention(client, mocker):
         'StoryID': ['ca8a7f8d-7f63-422f-8007-c4a26bb8e889']
     })
     mocker.patch('application.load_data', return_value=mock_data)
+
     rv = client.post('/visualize_attention', json={'model_key': 'model_2024-04-10-10', 'story_index': 0})
     assert rv.status_code == 200
     json_data = rv.get_json()
     assert 'image_path' in json_data
-    print("Image path:", json_data['image_path'])  # Debugging log
+    print("Image path for model_2024-04-10-10, story ca8a7f8d-7f63-422f-8007-c4a26bb8e889:", json_data['image_path'])  # Debugging log
 
-    # Test for the first story ID in model_2024-04-10-14
     mock_data = pd.DataFrame({
         'Premise': ['Test Premise'],
         'Initial': ['Test Initial'],
@@ -290,13 +290,13 @@ def test_visualize_attention(client, mocker):
         'StoryID': ['9387e571-2819-4e29-bedb-a35f0410da51']
     })
     mocker.patch('application.load_data', return_value=mock_data)
+
     rv = client.post('/visualize_attention', json={'model_key': 'model_2024-04-10-14', 'story_index': 0})
     assert rv.status_code == 200
     json_data = rv.get_json()
     assert 'image_path' in json_data
-    print("Image path:", json_data['image_path'])  # Debugging log
+    print("Image path for model_2024-04-10-14, story 9387e571-2819-4e29-bedb-a35f0410da51:", json_data['image_path'])  # Debugging log
 
-    # Test for the second story ID in model_2024-04-10-14
     mock_data = pd.DataFrame({
         'Premise': ['Test Premise 2'],
         'Initial': ['Test Initial 2'],
@@ -307,11 +307,12 @@ def test_visualize_attention(client, mocker):
         'StoryID': ['ca8a7f8d-7f63-422f-8007-c4a26bb8e889']
     })
     mocker.patch('application.load_data', return_value=mock_data)
+
     rv = client.post('/visualize_attention', json={'model_key': 'model_2024-04-10-14', 'story_index': 0})
     assert rv.status_code == 200
     json_data = rv.get_json()
     assert 'image_path' in json_data
-    print("Image path:", json_data['image_path'])  # Debugging log
+    print("Image path for model_2024-04-10-14, story ca8a7f8d-7f63-422f-8007-c4a26bb8e889:", json_data['image_path'])  # Debugging log
 
 if __name__ == '__main__':
     pytest.main()

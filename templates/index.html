@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Story Visualization</title>
+    <!-- Importing Google Fonts -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
     <style>
+        /* Basic styles for the page */
         body {
             font-family: 'Roboto', sans-serif;
             background-color: #f9f9fb;
@@ -35,15 +37,6 @@
         }
         select, textarea {
             flex: 1;
-        }
-        button {
-            background-color: #00A862;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            background-color: #33C481;
         }
         .story-details {
             margin-top: 20px;
@@ -101,6 +94,7 @@
 </head>
 <body>
 
+    <!-- Controls for selecting premise and model -->
     <div class="controls">
         <label for="story-select">Select Premise:</label>
         <select id="story-select">
@@ -110,9 +104,9 @@
         <select id="model-select">
             <!-- Model options will be populated by JavaScript -->
         </select>
-        <button id="heatmap-button">View Heatmap</button>
     </div>
 
+    <!-- Story details section -->
     <div class="story-details" id="story-details">
         <div class="row">
             <label for="initial-text">Initial:</label>
@@ -132,16 +126,19 @@
         </div>
     </div>
 
+    <!-- Attention map section -->
     <div id="attention-map">
         <img id="heatmap-image" src="">
     </div>
     
+    <!-- Importing Axios for making HTTP requests -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
+        // Wait for the DOM to be fully loaded
         document.addEventListener('DOMContentLoaded', function() {
+            // Getting references to HTML elements
             const modelSelect = document.getElementById('model-select');
             const storySelect = document.getElementById('story-select');
-            const heatmapButton = document.getElementById('heatmap-button');
             const heatmapImage = document.getElementById('heatmap-image');
             const storyDetails = document.getElementById('story-details');
             const initialText = document.getElementById('initial-text');
@@ -150,9 +147,9 @@
             const editedEndingText = document.getElementById('edited-ending-text');
             const generatedTextDiv = document.getElementById('generated-text');
 
-            let stories = [];
+            let stories = []; // Array to store the fetched stories
 
-            // Fetch and populate models
+            // Fetch and populate models from the server
             axios.get('/get_models').then(response => {
                 const models = response.data;
                 models.forEach((model, index) => {
@@ -161,7 +158,7 @@
                     option.textContent = model.comment;
                     modelSelect.appendChild(option);
                     if (index === 0) {
-                        option.selected = true;
+                        option.selected = true; // Select the first model by default
                     }
                 });
 
@@ -169,7 +166,7 @@
                 modelSelect.dispatchEvent(new Event('change'));
             });
 
-            // Fetch and populate stories
+            // Fetch and populate stories based on the selected model
             modelSelect.addEventListener('change', () => {
                 const selectedModel = modelSelect.value;
                 axios.post('/get_stories', { model_key: selectedModel }).then(response => {
@@ -181,7 +178,7 @@
                         option.textContent = story.Premise;
                         storySelect.appendChild(option);
                         if (index === 0) {
-                            option.selected = true;
+                            option.selected = true; // Select the first story by default
                         }
                     });
 
@@ -190,7 +187,7 @@
                 });
             });
 
-            // Display story details on premise selection
+            // Display story details and fetch heatmap image on premise selection
             storySelect.addEventListener('change', () => {
                 const selectedStoryIndex = storySelect.value;
                 const story = stories[selectedStoryIndex];
@@ -201,17 +198,15 @@
                     editedEndingText.value = story['Edited Ending'];
                     generatedTextDiv.textContent = story['Generated Text']; // Display the generated text
                     storyDetails.style.display = 'block';
-                } else {
-                    storyDetails.style.display = 'none';
-                }
-            });
 
-            // Visualize heatmap on button click
-            heatmapButton.addEventListener('click', () => {
-                const modelKey = modelSelect.value;
-                const imagePath = `/images/${modelKey}/9387e571-2819-4e29-bedb-a35f0410da51/attention_heatmap_9387e571-2819-4e29-bedb-a35f0410da51.png`;
-                heatmapImage.src = imagePath;
-                heatmapImage.style.display = 'block';
+                    // Fetch and display the heatmap image
+                    const selectedModel = modelSelect.value;
+                    const imagePath = `/static/images/${selectedModel}_${story.StoryID}.png`; // Updated image path
+                    heatmapImage.src = imagePath; // Set the image source to the constructed path
+                    heatmapImage.style.display = 'block'; // Display the image
+                } else {
+                    storyDetails.style.display = 'none'; // Hide the details if no story is selected
+                }
             });
         });
     </script>

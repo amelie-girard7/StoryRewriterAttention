@@ -14,26 +14,25 @@ def get_attention_data(attention_path, story_id):
     This function reads encoder, decoder, and cross-attention tensors and token data.
     Returns a tuple with attention data and tokens if successful, otherwise returns None.
     """
-    attention_dir = attention_path / str(story_id)
-    logger.info(f"Loading attention data from {attention_dir}")
+    logger.info(f"Loading attention data from {attention_path}")
 
-    if not attention_dir.exists():
-        logger.error(f"Attention directory does not exist: {attention_dir}")
+    if not attention_path.exists():
+        logger.error(f"Attention directory does not exist: {attention_path}")
         return None
 
     try:
-        encoder_attentions = [np.load(attention_dir / f'encoder_attentions_layer_{i}.npy') for i in range(12)]
+        encoder_attentions = [np.load(attention_path / f'encoder_attentions_layer_{i}.npy') for i in range(12)]
         logger.info(f"Loaded encoder attentions for layers 0-11")
-        decoder_attentions = [np.load(attention_dir / f'decoder_attentions_layer_{i}.npy') for i in range(12)]
+        decoder_attentions = [np.load(attention_path / f'decoder_attentions_layer_{i}.npy') for i in range(12)]
         logger.info(f"Loaded decoder attentions for layers 0-11")
-        cross_attentions = [np.load(attention_dir / f'cross_attentions_layer_{i}.npy') for i in range(12)]
+        cross_attentions = [np.load(attention_path / f'cross_attentions_layer_{i}.npy') for i in range(12)]
         logger.info(f"Loaded cross attentions for layers 0-11")
     except Exception as e:
         logger.error(f"Error loading attention arrays: {e}")
         return None
 
     try:
-        with open(attention_dir / "tokens.json") as f:
+        with open(attention_path / "tokens.json") as f:
             tokens = json.load(f)
             logger.info("Loaded tokens.json")
     except Exception as e:
@@ -89,6 +88,7 @@ def plot_attention_heatmap(attention, x_tokens, y_tokens, title, image_path):
     logger.info(f"Saving heatmap to {image_path}")
     plt.savefig(image_path)
     plt.close()
+    logger.info(f"Heatmap saved successfully to {image_path}")
 
 def visualize_attention(request, data_dir, load_data_func, logger, plot_heatmap_func):
     """
@@ -111,8 +111,8 @@ def visualize_attention(request, data_dir, load_data_func, logger, plot_heatmap_
 
     story_id = data.iloc[story_index]["StoryID"]
 
-    attention_path = data_dir / model_key / 'attentions'
-    image_path = generate_attention_image_path(model_key, story_id, data_dir)
+    attention_path = data_dir / model_key / 'attentions' / str(story_id)
+    image_path = generate_attention_image_path(model_key, story_id, IMAGE_DIR)
 
     try:
         result = get_attention_data(attention_path, story_id)
@@ -161,4 +161,5 @@ def generate_attention_image_path(model_key, story_id, base_dir):
     Returns:
     str: The path to the attention heatmap image.
     """
-    return base_dir / model_key / 'attentions' / story_id / f'attention_heatmap_{story_id}.png'
+    filename = f'{model_key}_{story_id}.png'
+    return base_dir / model_key / filename
