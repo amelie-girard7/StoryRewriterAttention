@@ -48,7 +48,7 @@ def get_stories():
     if model_key is None:
         return jsonify({"error": "Model key not provided"}), 400
 
-    data_path = DATA_DIR / f'{model_key}/test_data_sample-attention.csv'
+    data_path = DATA_DIR / model_key / 'test_data_sample-attention.csv'
     data = load_data(data_path)
     if data is None:
         return jsonify({"error": "Data not found"}), 404
@@ -68,7 +68,7 @@ def fetch_story_data():
     except ValueError:
         return jsonify({"error": "Invalid story index"}), 400
 
-    data_path = DATA_DIR / f'{model_key}/test_data_sample-attention.csv'
+    data_path = DATA_DIR / model_key / 'test_data_sample-attention.csv'
     data = load_data(data_path)
     if data is None:
         return jsonify({"error": "Data not found"}), 404
@@ -89,7 +89,7 @@ def visualize_attention_route():
     except ValueError:
         return jsonify({"error": "Invalid story index"}), 400
 
-    data_path = DATA_DIR / f'{model_key}/test_data_sample-attention.csv'
+    data_path = DATA_DIR / model_key / 'test_data_sample-attention.csv'
     data = load_data(data_path)
     if data is None:
         return jsonify({"error": "Data not found"}), 404
