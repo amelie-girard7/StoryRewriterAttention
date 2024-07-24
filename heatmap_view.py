@@ -5,30 +5,35 @@ import seaborn as sns
 import os
 from flask import jsonify
 import logging
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 def get_attention_data(attention_path, story_id):
-    logger.info(f"Loading attention data from {attention_path}")
+    """
+    Load attention data for a given story ID.
+    This function reads encoder, decoder, and cross-attention tensors and token data.
+    Returns a tuple with attention data and tokens if successful, otherwise returns None.
+    """
+    attention_dir = attention_path / str(story_id)
+    logger.info(f"Loading attention data from {attention_dir}")
 
-    if not attention_path.exists():
-        logger.error(f"Attention directory does not exist: {attention_path}")
+    if not attention_dir.exists():
+        logger.error(f"Attention directory does not exist: {attention_dir}")
         return None
 
     try:
-        encoder_attentions = [np.load(attention_path / f'encoder_attentions_layer_{i}.npy') for i in range(12)]
+        encoder_attentions = [np.load(attention_dir / f'encoder_attentions_layer_{i}.npy') for i in range(12)]
         logger.info(f"Loaded encoder attentions for layers 0-11")
-        decoder_attentions = [np.load(attention_path / f'decoder_attentions_layer_{i}.npy') for i in range(12)]
+        decoder_attentions = [np.load(attention_dir / f'decoder_attentions_layer_{i}.npy') for i in range(12)]
         logger.info(f"Loaded decoder attentions for layers 0-11")
-        cross_attentions = [np.load(attention_path / f'cross_attentions_layer_{i}.npy') for i in range(12)]
+        cross_attentions = [np.load(attention_dir / f'cross_attentions_layer_{i}.npy') for i in range(12)]
         logger.info(f"Loaded cross attentions for layers 0-11")
     except Exception as e:
         logger.error(f"Error loading attention arrays: {e}")
         return None
 
     try:
-        with open(attention_path / "tokens.json") as f:
+        with open(attention_dir / "tokens.json") as f:
             tokens = json.load(f)
             logger.info("Loaded tokens.json")
     except Exception as e:
@@ -46,6 +51,16 @@ def get_attention_data(attention_path, story_id):
     return encoder_attentions, decoder_attentions, cross_attentions, encoder_text, generated_text, generated_text_tokens
 
 def plot_attention_heatmap(attention, x_tokens, y_tokens, title, image_path):
+    """
+    Plot and save an attention heatmap.
+
+    Parameters:
+    attention (numpy.ndarray): The attention weights to be visualized.
+    x_tokens (list of str): The input tokens.
+    y_tokens (list of str): The generated text tokens.
+    title (str): The title for the heatmap.
+    image_path (str): The path to save the generated heatmap image.
+    """
     logger.info("Number of x_tokens (input): %d", len(x_tokens))
     logger.info("Number of y_tokens (generated text): %d", len(y_tokens))
     logger.info("Attention matrix shape: %s", attention.shape)
@@ -74,9 +89,11 @@ def plot_attention_heatmap(attention, x_tokens, y_tokens, title, image_path):
     logger.info(f"Saving heatmap to {image_path}")
     plt.savefig(image_path)
     plt.close()
-    logger.info(f"Heatmap saved successfully to {image_path}")
 
 def visualize_attention(request, data_dir, load_data_func, logger, plot_heatmap_func):
+    """
+    Generate and return the attention heatmap for a specific story.
+    """
     model_key = request.json.get('model_key')
     story_index = request.json.get('story_index')
     if model_key is None or story_index is None:
@@ -87,15 +104,15 @@ def visualize_attention(request, data_dir, load_data_func, logger, plot_heatmap_
     except ValueError:
         return jsonify({"error": "Invalid story index"}), 400
 
-    data_path = data_dir / f'{model_key}/test_data_sample-attention.csv'
+    data_path = data_dir / model_key / 'test_data_sample-attention.csv'
     data = load_data_func(data_path)
     if data is None:
         return jsonify({"error": "Data not found"}), 404
 
     story_id = data.iloc[story_index]["StoryID"]
 
-    attention_path = data_dir / f'{model_key}/attentions/{story_id}'
-    image_path = generate_attention_image_path(model_key, story_id, Path('images'))
+    attention_path = data_dir / model_key / 'attentions'
+    image_path = generate_attention_image_path(model_key, story_id, data_dir)
 
     try:
         result = get_attention_data(attention_path, story_id)
@@ -133,5 +150,15 @@ def visualize_attention(request, data_dir, load_data_func, logger, plot_heatmap_
     return jsonify({"image_path": str(image_path)})
 
 def generate_attention_image_path(model_key, story_id, base_dir):
-    filename = f'{model_key}_{story_id}.png'
-    return base_dir / filename
+    """
+    Generate the path for the attention heatmap image based on model key and story ID.
+
+    Parameters:
+    model_key (str): The model identifier.
+    story_id (str): The story identifier.
+    base_dir (Path): The base directory where the data is stored.
+
+    Returns:
+    str: The path to the attention heatmap image.
+    """
+    return base_dir / model_key / 'attentions' / story_id / f'attention_heatmap_{story_id}.png'

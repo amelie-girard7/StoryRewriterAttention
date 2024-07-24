@@ -286,7 +286,10 @@
 
                     // Fetch and display the heatmap image
                     const selectedModel = modelSelect.value;
-                    const imagePath = `/static/images/${selectedModel}_${story.StoryID}.png`; // Updated image path
+                    console.log("Selected Model:", selectedModel); // Debugging log
+                    console.log("Story ID:", story.StoryID); // Debugging log
+                    const imagePath = `/images/${selectedModel}_${story.StoryID}.png`; // Updated image path
+                    console.log("Image Path:", imagePath); // Debugging log
                     heatmapImage.src = imagePath; // Set the image source to the constructed path
                     heatmapImage.style.display = 'block'; // Display the image
                 } else {
