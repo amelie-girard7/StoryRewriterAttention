@@ -5,6 +5,7 @@ import seaborn as sns
 import os
 from flask import jsonify
 import logging
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -161,4 +162,5 @@ def generate_attention_image_path(model_key, story_id, base_dir):
     Returns:
     str: The path to the attention heatmap image.
     """
-    return base_dir / model_key / 'attentions' / story_id / f'attention_heatmap_{story_id}.png'
+    images_dir = base_dir / 'images'
+    return images_dir / f'{model_key}_{story_id}.png'

@@ -17,7 +17,7 @@ class Config:
     DEBUG = False
     TESTING = False
     DATABASE_URI = os.getenv('DATABASE_URI', 'sqlite:///:memory:')
-    DATA_DIR = Path('/data/agirard/Projects/StoryRewriterAttention/data')  # Ensure this is a Path object
+    DATA_DIR = Path('data')  # Ensure this is a Path object
 
 class ProductionConfig(Config):
     pass
@@ -189,7 +189,7 @@ def serve_image(filename):
     """
     Serve the generated heatmap image from the centralized images directory.
     """
-    images_dir = Path('/data/agirard/Projects/StoryRewriterAttention/images')
+    images_dir = Path('images')
     return send_from_directory(images_dir, filename)
 
 def generate_attention_image_path(model_key, story_id, base_dir):
@@ -204,7 +204,7 @@ def generate_attention_image_path(model_key, story_id, base_dir):
     Returns:
     str: The path to the attention heatmap image.
     """
-    images_dir = Path('/data/agirard/Projects/StoryRewriterAttention/images')
+    images_dir = base_dir / 'images'
     return images_dir / f'{model_key}_{story_id}.png'
 
 if __name__ == '__main__':
