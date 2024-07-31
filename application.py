@@ -208,4 +208,5 @@ def generate_attention_image_path(model_key, story_id, base_dir):
     return images_dir / f'{model_key}_{story_id}.png'
 
 if __name__ == '__main__':
-    app.run(debug=app.config['DEBUG'])
+    # app.run(debug=app.config['DEBUG'])
+    app.run(host='0.0.0.0', debug=app.config['DEBUG'])
