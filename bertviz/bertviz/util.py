@@ -10,7 +10,7 @@ def format_attention(attention, layers=None, heads=None):
         # Ensure the tensor is 4D (batch_size, num_heads, seq_len, seq_len)
         if len(layer_attention.shape) != 4:
             raise ValueError(f"Layer {i} attention tensor does not have the correct number of dimensions. Expected 4D, got {len(layer_attention.shape)}D")
-        # layer_attention = layer_attention.squeeze(0)  # Remove batch dimension
+        layer_attention = layer_attention.squeeze(0)  # Remove batch dimension
         print(f"Layer {i} attention shape after squeeze: {layer_attention.shape}")
         if heads:
             layer_attention = layer_attention[heads]
